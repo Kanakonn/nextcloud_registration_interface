@@ -1,0 +1,7 @@
+.idea/
+venv/
+nextcloud_register/local.py
+db.sqlite3
+__pycache__/
+static/
+

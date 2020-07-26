@@ -1,0 +1,86 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register for {{ server_name }}</title>
+    <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'custom.css' %}">
+</head>
+<body>
+<div class="container">
+    {% if messages %}
+        <div class="row">
+            <div class="col">
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}" role="alert">
+                        {{ message|safe }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col">
+            <h2 class="mt-4">Register for {{ server_name }}</h2>
+            <p>
+                Please fill in the following information to register for {{ server_name }}. An invite code is required.
+            </p>
+        </div>
+    </div>
+    {% if form.non_field_errors %}
+        <div class="row">
+            <div class="col">
+                {{ form.non_field_errors }}
+            </div>
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col">
+            <form method="post" action="{% url 'register' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input placeholder="{{ form.invite_code.label }}" type="text" name="{{ form.invite_code.html_name }}" class="form-control {% if form.invite_code.errors %}is-invalid{% endif %}" id="{{ form.invite_code.id_for_label }}" value="{% if form.invite_code.value %}{{ form.invite_code.value }}{% endif %}" required="">
+                    {% for error in form.invite_code.errors %}
+                        <div class="invalid-feedback">{{ error|escape }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <input placeholder="{{ form.username.label }}" type="text" name="{{ form.username.html_name }}" class="form-control {% if form.username.errors %}is-invalid{% endif %}" id="{{ form.username.id_for_label }}" value="{% if form.username.value %}{{ form.username.value }}{% endif %}" required="" maxlength="191">
+                    {% for error in form.username.errors %}
+                        <div class="invalid-feedback">{{ error|escape }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <input placeholder="{{ form.password.label }}" type="password" name="{{ form.password.html_name }}" class="form-control {% if form.password.errors %}is-invalid{% endif %}" id="{{ form.password.id_for_label }}" value="{% if form.password.value %}{{ form.password.value }}{% endif %}" required="">
+                    {% for error in form.password.errors %}
+                        <div class="invalid-feedback">{{ error|escape }}</div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="form-group">
+                    <input placeholder="{{ form.display_name.label }}" type="text" name="{{ form.display_name.html_name }}" class="form-control {% if form.display_name.errors %}is-invalid{% endif %}" id="{{ form.display_name.id_for_label }}" value="{% if form.display_name.value %}{{ form.display_name.value }}{% endif %}" required="" maxlength="191">
+                    {% for error in form.display_name.errors %}
+                        <div class="invalid-feedback">{{ error|escape }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <input placeholder="{{ form.email_address.label }}" type="email" name="{{ form.email_address.html_name }}" class="form-control {% if form.email_address.errors %}is-invalid{% endif %}" id="{{ form.email_address.id_for_label }}" value="{% if form.email_address.value %}{{ form.email_address.value }}{% endif %}" required="">
+                    {% for error in form.email_address.errors %}
+                        <div class="invalid-feedback">{{ error|escape }}</div>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="btn btn-success">Register</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

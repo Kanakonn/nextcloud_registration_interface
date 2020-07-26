@@ -1,0 +1,14 @@
+[Unit]
+Description=Daphne ASGI server for nextcloud_registration_service
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/nextcloud_registration_interface
+ExecStart=/opt/nextcloud_registration_interface/venv/bin/daphne -b 127.0.0.1 -p 12001 nextcloud_register.asgi:application
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

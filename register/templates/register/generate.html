@@ -1,0 +1,106 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Generate invite tokens for {{ server_name }}</title>
+    <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'custom.css' %}">
+</head>
+<body>
+<div class="container">
+    {% if messages %}
+        <div class="row">
+            <div class="col">
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}" role="alert">
+                        {{ message|safe }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col">
+            <h2 class="mt-4">Generate new invite codes for {{ server_name }}</h2>
+        </div>
+    </div>
+    {% if form.non_field_errors %}
+        <div class="row">
+            <div class="col">
+                {{ form.non_field_errors }}
+            </div>
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col">
+            <form method="post" action="{% url 'generate' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input placeholder="{{ form.amount.label }}" type="number" name="{{ form.amount.html_name }}" class="form-control {% if form.amount.errors %}is-invalid{% endif %}" id="{{ form.amount.id_for_label }}" value="{% if form.amount.value %}{{ form.invite_code.value }}{% endif %}" required="">
+                    {% for error in form.amount.errors %}
+                        <div class="invalid-feedback">{{ error|escape }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.group.id_for_label }}">Default group (if not filled in, the group will be "{{ default_group }}")</label>
+                    <select id="{{ form.group.id_for_label }}" name="{{ form.group.html_name }}" class="custom-select">
+                        <option>Default</option>
+                        {% for value, display in form.fields.group.choices %}
+                            <option value="{{ value }}"{% if form.fields.group.value == value %} selected{% endif %}>{{ display }}</option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.group.errors %}
+                        <div class="invalid-feedback">{{ error|escape }}</div>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-success">Generate</button>
+            </form>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col">
+            <h4>Available codes</h4>
+            <p>These codes have not been used yet by anyone.</p>
+            {% regroup available_codes by group as available_codes_by_group %}
+            {% for group, codes in available_codes_by_group %}
+                <p><b>{% if group %}{{ group }}{% else %}Default ("{{ default_group }}"){% endif %}</b></p>
+                <ul>
+                    {% for code in codes %}
+                        <li>{{ code.code }}</li>
+                    {% empty %}
+                        <li><i>No codes available for this group</i></li>
+                    {% endfor %}
+                </ul>
+            {% empty %}
+                <p><i>There are no available codes.</i></p>
+            {% endfor %}
+
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col">
+            <h4>Used codes</h4>
+            <p>These codes have already been used by someone.</p>
+            {% regroup used_codes by group as used_codes_by_group %}
+            {% for group, codes in used_codes_by_group %}
+                <p><b>{% if group %}{{ group }}{% else %}Default ("{{ default_group }}"){% endif %}</b></p>
+                <ul>
+                    {% for code in codes %}
+                        <li>{{ code.code }} (used by {{ code.used_by }})</li>
+                    {% empty %}
+                        <li><i>No codes used for this group</i></li>
+                    {% endfor %}
+                </ul>
+            {% empty %}
+                <p><i>There are no used codes.</i></p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+</body>
+</html>

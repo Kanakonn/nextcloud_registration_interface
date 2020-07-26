@@ -10,7 +10,6 @@ class RegisterForm(forms.Form):
     username = forms.CharField(max_length=191)
     password = forms.CharField(widget=forms.PasswordInput())
     display_name = forms.CharField(max_length=191)
-    email_address = forms.EmailField()
 
     def clean_invite_code(self):
         code = self.cleaned_data['invite_code']
@@ -34,7 +33,6 @@ class RegisterForm(forms.Form):
         username = self.cleaned_data['username']
         password = self.cleaned_data['password']
         display_name = self.cleaned_data['display_name']
-        email_address = self.cleaned_data['email_address']
 
         new_user_res = nc.add_user(username, password)
         if new_user_res.status_code != 100:
@@ -64,13 +62,12 @@ class RegisterForm(forms.Form):
 
         # Set user parameters and add to wanted group
         edit_display_res = nc.edit_user(username, 'displayname', display_name)
-        edit_email_res = nc.edit_user(username, 'email', email_address)
         if code.group:
             add_viewers_res = nc.add_to_group(username, code.group)
         else:
             add_viewers_res = nc.add_to_group(username, settings.NEXTCLOUD_GROUP_NAME)
 
-        if all([x.status_code == 100 for x in [edit_display_res, edit_email_res, add_viewers_res]]):
+        if all([x.status_code == 100 for x in [edit_display_res, add_viewers_res]]):
             return True, ""
 
         reasons = []
@@ -80,13 +77,6 @@ class RegisterForm(forms.Form):
             reasons.append("Could not update display name, invalid display name.")
         else:
             reasons.append("Could not update display name, unknown error.")
-
-        if edit_email_res.status_code == 101:
-            reasons.append("Could not update email address, user not found.")
-        elif edit_email_res.status_code == 102:
-            reasons.append("Could not update email address, invalid email.")
-        else:
-            reasons.append("Could not update email address, unknown error.")
 
         if add_viewers_res.status_code == 101:
             reasons.append("Could not add user to default group, group not specified.")

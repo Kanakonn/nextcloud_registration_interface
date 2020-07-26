@@ -70,12 +70,6 @@
                         <div class="invalid-feedback">{{ error|escape }}</div>
                     {% endfor %}
                 </div>
-                <div class="form-group">
-                    <input placeholder="{{ form.email_address.label }}" type="email" name="{{ form.email_address.html_name }}" class="form-control {% if form.email_address.errors %}is-invalid{% endif %}" id="{{ form.email_address.id_for_label }}" value="{% if form.email_address.value %}{{ form.email_address.value }}{% endif %}" required="">
-                    {% for error in form.email_address.errors %}
-                        <div class="invalid-feedback">{{ error|escape }}</div>
-                    {% endfor %}
-                </div>
 
                 <button type="submit" class="btn btn-success">Register</button>
             </form>

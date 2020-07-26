@@ -19,7 +19,7 @@ class RegisterView(FormView):
         return context
 
     def form_valid(self, form):
-        # success, msg = form.dum_create_account()
+        # success, msg = form.dummy_create_account()
         success, msg = form.create_account()
         if success and msg != "":
             messages.warning(self.request, "Account was created, but some error(s) occurred:\n{}".format(msg))
@@ -38,8 +38,8 @@ class GenerateInvitesView(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super(GenerateInvitesView, self).get_context_data(**kwargs)
         context['default_group'] = settings.NEXTCLOUD_GROUP_NAME
-        context['available_codes'] = InviteCode.objects.filter(used=False).order_by('group')
-        context['used_codes'] = InviteCode.objects.filter(used=True).order_by('group')
+        context['available_codes'] = InviteCode.objects.filter(used=False).order_by('groups')
+        context['used_codes'] = InviteCode.objects.filter(used=True).order_by('groups')
         context['server_name'] = settings.NEXTCLOUD_NAME
         return context
 

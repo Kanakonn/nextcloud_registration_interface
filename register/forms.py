@@ -62,12 +62,17 @@ class RegisterForm(forms.Form):
 
         # Set user parameters and add to wanted group
         edit_display_res = nc.edit_user(username, 'displayname', display_name)
-        if code.group:
-            add_viewers_res = nc.add_to_group(username, code.group)
+        if code.groups:
+            groups = code.groups.split(",")
+            results = []
+            for group in groups:
+                add_viewers_res = nc.add_to_group(username, group)
+                results.append((group, add_viewers_res))
         else:
             add_viewers_res = nc.add_to_group(username, settings.NEXTCLOUD_GROUP_NAME)
+            results = [(settings.NEXTCLOUD_GROUP_NAME, add_viewers_res)]
 
-        if all([x.status_code == 100 for x in [edit_display_res, add_viewers_res]]):
+        if edit_display_res.status_code == 100 and all([x[1].status_code == 100 for x in results]):
             return True, ""
 
         reasons = []
@@ -78,18 +83,19 @@ class RegisterForm(forms.Form):
         else:
             reasons.append("Could not update display name, unknown error.")
 
-        if add_viewers_res.status_code == 101:
-            reasons.append("Could not add user to default group, group not specified.")
-        elif add_viewers_res.status_code == 102:
-            reasons.append("Could not add user to default group, groep does not exist.")
-        elif add_viewers_res.status_code == 103:
-            reasons.append("Could not add user to default group, user does not exist.")
-        elif add_viewers_res.status_code == 104:
-            reasons.append("Could not add user to default group, insufficient privileges.")
-        elif add_viewers_res.status_code == 105:
-            reasons.append("Could not add user to default group, failed to add user to group.")
-        else:
-            reasons.append("Could not add user to default group, unknown error.")
+        for group, result in results:
+            if result.status_code == 101:
+                reasons.append("Could not add user to group '{}', group not specified.".format(group))
+            elif result.status_code == 102:
+                reasons.append("Could not add user to group '{}', groep does not exist.".format(group))
+            elif result.status_code == 103:
+                reasons.append("Could not add user to group '{}', user does not exist.".format(group))
+            elif result.status_code == 104:
+                reasons.append("Could not add user to group '{}', insufficient privileges.".format(group))
+            elif result.status_code == 105:
+                reasons.append("Could not add user to group '{}', failed to add user to group.".format(group))
+            else:
+                reasons.append("Could not add user to group '{}', unknown error.".format(group))
 
         return True, "\n".join(reasons)
 
@@ -109,14 +115,14 @@ class GenerateInvitesForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(GenerateInvitesForm, self).__init__(*args, **kwargs)
-        self.fields['group'] = forms.ChoiceField(choices=get_available_groups(), required=False)
+        self.fields['groups'] = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, choices=get_available_groups(), required=False)
 
     def generate_codes(self):
         created = []
-        group = self.cleaned_data['group']
-        if not group:
-            group = settings.NEXTCLOUD_GROUP_NAME
+        groups = self.cleaned_data['groups']
+        if not groups:
+            groups = [settings.NEXTCLOUD_GROUP_NAME]
         for _ in range(self.cleaned_data['amount']):
-            created.append(InviteCode.objects.create(used=False, used_by=None, group=group))
+            created.append(InviteCode.objects.create(used=False, used_by=None, groups=",".join(groups)))
 
         return self.cleaned_data['amount'], created

@@ -47,14 +47,14 @@
                     {% endfor %}
                 </div>
                 <div class="form-group">
-                    <label for="{{ form.group.id_for_label }}">Default group (if not filled in, the group will be "{{ default_group }}")</label>
-                    <select id="{{ form.group.id_for_label }}" name="{{ form.group.html_name }}" class="custom-select">
-                        <option>Default</option>
-                        {% for value, display in form.fields.group.choices %}
-                            <option value="{{ value }}"{% if form.fields.group.value == value %} selected{% endif %}>{{ display }}</option>
+                    <label for="{{ form.groups.id_for_label }}">Default group(s), CTRL+click to select multiple (if not filled in, the group will be "{{ default_group }}")</label>
+
+                    <select multiple size="10" class="form-control" id="{{ form.groups.id_for_label }}" name="{{ form.groups.html_name }}">
+                        {% for value, display in form.fields.groups.choices %}
+                            <option value="{{ value }}"{% if form.fields.groups.value == value %} selected{% endif %}>{{ display }}</option>
                         {% endfor %}
                     </select>
-                    {% for error in form.group.errors %}
+                    {% for error in form.groups.errors %}
                         <div class="invalid-feedback">{{ error|escape }}</div>
                     {% endfor %}
                 </div>
@@ -66,9 +66,9 @@
         <div class="col">
             <h4>Available codes</h4>
             <p>These codes have not been used yet by anyone.</p>
-            {% regroup available_codes by group as available_codes_by_group %}
-            {% for group, codes in available_codes_by_group %}
-                <p><b>{% if group %}{{ group }}{% else %}Default ("{{ default_group }}"){% endif %}</b></p>
+            {% regroup available_codes by groups as available_codes_by_groups %}
+            {% for groups, codes in available_codes_by_groups %}
+                <p><b>{% if groups %}{{ groups }}{% else %}Default ("{{ default_group }}"){% endif %}</b></p>
                 <ul>
                     {% for code in codes %}
                         <li>{{ code.code }}</li>
@@ -86,9 +86,9 @@
         <div class="col">
             <h4>Used codes</h4>
             <p>These codes have already been used by someone.</p>
-            {% regroup used_codes by group as used_codes_by_group %}
-            {% for group, codes in used_codes_by_group %}
-                <p><b>{% if group %}{{ group }}{% else %}Default ("{{ default_group }}"){% endif %}</b></p>
+            {% regroup used_codes by groups as used_codes_by_groups %}
+            {% for groups, codes in used_codes_by_groups %}
+                <p><b>{% if groups %}{{ groups }}{% else %}Default ("{{ default_group }}"){% endif %}</b></p>
                 <ul>
                     {% for code in codes %}
                         <li>{{ code.code }} (used by {{ code.used_by }})</li>
